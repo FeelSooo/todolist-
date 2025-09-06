@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
 class TaskCreate(BaseModel):
@@ -15,3 +15,10 @@ class TaskPatch(BaseModel):
 class GetTasksFilter(BaseModel):
     done: bool | None = None # поиск сделано\не сделано
     q: str | None = None # поиск по подстроке
+
+
+class TaskOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True) # чтобы начать работать с ORM-объектами
+    id: int
+    title: str
+    done: bool

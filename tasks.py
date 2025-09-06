@@ -1,40 +1,41 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
-from schemas import TaskCreate, TaskPatch, GetTasksFilter
-
+from schemas import TaskCreate, TaskPatch, TaskOut, GetTasksFilter
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+from db import get_db
+from models import Task
 
 router = APIRouter(prefix="/tasks", tags=["task"])
 
 
 @router.post("/", status_code=201)
-def add_task(request: Request, creates: TaskCreate):
-    tasks = request.app.state.tasks
-    tid = next(request.app.state.id_seq)
-    tasks[tid] = {"title": creates.title, "done": False}
-    return {"id": tid, **tasks[tid]}
+def add_task(creates: TaskCreate, db: Session = Depends(get_db)): 
+    task = Task(title=creates.title, done = False)
+    task.title_ci = task.title.lower()
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    return task
 
 
-@router.get("/{task_id}")
-def get_task(task_id: int, request: Request):
-    tasks = request.app.state.tasks
-    item = tasks.get(task_id)
-    if item is None:
+@router.get("/{task_id}", response_model= TaskOut)
+def get_task(task_id: int, db: Session = Depends(get_db)):
+    task = db.get(Task, task_id)
+    if task is None:
         raise HTTPException(status_code=404, detail="задачи с таким айди нет")
-    else:
-        return item
+    return task    
     
 
-@router.get("/")
-def get_tasks(request: Request, params:GetTasksFilter = Depends()):
-    tasks = request.app.state.tasks
-    items = [{"id": i, **obj} for i,obj in tasks.items()]
-
+@router.get("/", response_model = list[TaskOut])
+def get_tasks(db:Session = Depends(get_db), params:GetTasksFilter = Depends()):
+    query = select(Task)
     if params.done is not None:
-        items = [t for t in items if t["done"] == params.done]
+        query = query.where(Task.done == params.done)
     if params.q:
-        s = params.q.lower()
-        items = [t for t in items if s in t["title"].lower()]
+        query = query.where(Task.title_ci.contains(params.q.lower()))
+    rows = db.execute(query.order_by(Task.id.asc()))
+    return rows.scalars().all()
 
-    return items
 
 @router.patch("/{task_id}")
 def done_task(task_id: int, request: Request, payload: TaskPatch):
