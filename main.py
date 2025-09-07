@@ -10,8 +10,8 @@ app = FastAPI()
 Base.metadata.create_all(bind=engine)
 
 # общий стейт
-app.state.tasks = {}
-app.state.id_seq = count()    
+# app.state.tasks = {}
+# app.state.id_seq = count()    
 
 
 #включаю эндпоинты

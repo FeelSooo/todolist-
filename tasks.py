@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, Response, HTTPException, Depends
 from schemas import TaskCreate, TaskPatch, TaskOut, GetTasksFilter
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -37,21 +37,23 @@ def get_tasks(db:Session = Depends(get_db), params:GetTasksFilter = Depends()):
     return rows.scalars().all()
 
 
-@router.patch("/{task_id}")
-def done_task(task_id: int, request: Request, payload: TaskPatch):
-    tasks = request.app.state.tasks
-    item = tasks.get(task_id)
-    if item is None:
+@router.patch("/{task_id}", response_model=TaskOut)
+def done_task(task_id: int, payload: TaskPatch, db: Session = Depends(get_db)):
+    task = db.get(Task, task_id)
+    if task is None:
         raise HTTPException(status_code=404, detail="задачи с таким айди нет")
     if payload.done is not None:
-        item["done"] = payload.done
-        return item
+        task.done = payload.done
+    db.commit()
+    db.refresh(task)
+    return task
 
 
 @router.delete("/{task_id}", status_code=204)
-def delete_task(task_id: int, request: Request):
-    tasks = request.app.state.tasks
-    if task_id not in tasks:
-        raise HTTPException(status_code=404,detail="задачи с таким айди нет")
-    del tasks[task_id]
-    return {"msg": "task removed"}
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    task = db.get(Task, task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="задачи с таким айди нет")
+    db.delete(task)
+    db.commit()
+    return Response(status_code=204)
