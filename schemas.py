@@ -7,6 +7,7 @@ class TaskCreate(BaseModel):
 
 class TaskPatch(BaseModel):
     done: bool | None = None
+    title: str = Field(min_length=1)
     # todo
     # sdelat' dlya samoi taski toje izmenenya :)
     # new_title: str | None
