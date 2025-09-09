@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional
+from datetime import datetime
 
 class TaskCreate(BaseModel):
     title: str = Field(...,min_length=1)
@@ -7,7 +7,7 @@ class TaskCreate(BaseModel):
 
 class TaskPatch(BaseModel):
     done: bool | None = None
-    title: str = Field(min_length=1)
+    title: str | None = Field(default=None, min_length=1)
     # todo
     # sdelat' dlya samoi taski toje izmenenya :)
     # new_title: str | None
@@ -23,3 +23,5 @@ class TaskOut(BaseModel):
     id: int
     title: str
     done: bool
+    created_at: datetime
+    updated_at: datetime
