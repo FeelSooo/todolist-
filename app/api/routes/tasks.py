@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Response, HTTPException, Depends
+
+from app.api.responses.tasks import TaskResponse, TasksRequest
 from app.schemas import TaskCreate, TaskPatch, TaskOut, GetTasksFilter
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -32,12 +34,12 @@ router = APIRouter(prefix="/tasks", tags=["task"])
 
 @router.get(
     "/",
-    response_model=list[TaskOut],
+    response_model=TasksRequest,
 )
 async def get_tasks(
     filters: GetTasksFilter = Depends(),
     service: TasksService = Depends(TasksService),
-):
+) -> TasksRequest:
     return await service.get_tasks(
         filters=filters,
     )

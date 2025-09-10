@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.db import get_session
+from app.models.task import Task
 from app.utils import get_repository
 from app.repositories.tasks import TasksRepository
 from app.schemas import GetTasksFilter
@@ -28,4 +29,4 @@ class TasksService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail={"error": ["Tasks not found"]},
             )
-        return tasks
+        return {"result": tasks}

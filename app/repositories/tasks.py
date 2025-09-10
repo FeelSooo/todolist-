@@ -1,6 +1,9 @@
+from typing import Sequence
+
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
+from yaml import SequenceStartEvent
 
 from app.db import get_session
 from app.models.task import Task
@@ -15,7 +18,7 @@ class TasksRepository:
     async def get_tasks(
         self,
         filters: GetTasksFilter,
-    ):
+    ) -> Sequence[Task]:
         query = select(Task)
         if filters.done is not None:
             query = query.where(Task.done == filters.done)
