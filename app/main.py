@@ -1,8 +1,7 @@
 from fastapi import FastAPI
-from tasks import router as task_router
-from itertools import count
-from db import engine
-from models import Base
+from app.tasks import router as task_router
+from app.db import engine
+from app.models import Base
 
 
 app = FastAPI()
