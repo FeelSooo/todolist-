@@ -4,8 +4,6 @@ from app.api.filters.tasks import GetTasksFilter
 from app.api.requests.tasks import CreateTaskRequest, UpdateTaskRequest
 from app.api.responses.tasks import TaskResponse, TasksRequest
 
-from sqlalchemy.orm import Session
-from app.db import get_session
 from app.models.task import Task
 
 from app.services.tasks import TasksService
