@@ -1,0 +1,25 @@
+from typing import Sequence
+
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
+from app.db import get_session
+from app.models.task import Task
+from app.api.filters import GetTasksFilter
+from sqlalchemy import select
+
+
+class TasksRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_tasks(self, filters: GetTasksFilter) -> Sequence[Task]:
+        query = select(Task)
+        if filters.done is not None:
+            query = query.where(Task.done == filters.done)
+        if filters.q:
+            query = query.where(Task.title_ci.contains(filters.q.lower()))
+
+        rows = await self.session.execute(query.order_by(Task.id.asc()))
+        return rows.scalars().all()
