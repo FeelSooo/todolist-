@@ -11,11 +11,11 @@ from app.services.tasks import TasksService
 router = APIRouter(prefix="/tasks", tags=["task"])
 
 
-@router.post("/", response_model=TaskResponse,_status_code=201)
-async def add_task(payload: CreateTaskRequest, service:TasksService = Depends(TasksService)):
-    # task = await service.create_task(payload) 
-    # return task
-    pass
+# @router.post("/", response_model=TaskResponse,_status_code=201)
+# async def add_task(payload: CreateTaskRequest, service:TasksService = Depends(TasksService)):
+#     # task = await service.create_task(payload) 
+#     # return task
+#     pass
 
 
 # @router.get("/{task_id}", response_model=TaskOut)

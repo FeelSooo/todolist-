@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
 from app.models.task import Task
-from app.api.filters import GetTasksFilter
+from app.api.filters.tasks import GetTasksFilter
 from sqlalchemy import select
 
 
