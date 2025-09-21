@@ -39,38 +39,32 @@ class TasksService:
 
 
     async def patch_task(self, task_id: int, req: TaskUpdate) -> TaskResponse:
-        task = await self.tasks_repository.get_task_by_id(task_id)
-        if task is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
-        
-        changed = False
-
-        if req.title is not None and req.title != task.title:
-            if hasattr(task, "title_ci"):
-                task.title_ci = req.title.lower()
-            changed = True
-
-        if req.done is not None and req.done != task.done:
-            task.done = req.done
-            changed = True
-        
-        # если ничего не поменялось
-        if not changed:
-            return TaskResponse.model_validate(task)
-        
         async with self.session.begin():
-            try:
-                await self.session.flush()
-                await self.session.refresh()
-            except IntegrityError:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="title already exist"
-                )
-        return TaskResponse.model_validate(task)
-        
+            task = await self.tasks_repository.get_task_by_id(task_id)
+            if task is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
+            
+            changed = False
 
+            if req.title is not None and req.title != task.title:
+                if hasattr(task, "title_ci"):
+                    task.title = req.title
+                    task.title_ci = req.title.lower()
+                changed = True
 
+            if req.done is not None and req.done != task.done:
+                task.done = req.done
+                changed = True
+            
+            # если ничего не поменялось
+            if not changed:
+                return TaskResponse.model_validate(task)     
+            
+            await self.session.flush()
+            await self.session.refresh(task)
+            
+        return TaskResponse.model_validate(task)     
+    
 
     async def create_tasks(self, req: TaskCreate) -> TaskResponse:
         task = Task(
