@@ -14,8 +14,7 @@ class TaskUpdate(BaseModel):
         if self.title is None and self.done is None:
             raise ValueError("Хотя бы одно поле должно быть заполнено")
         return self
-
-
+    
 
 class GetTasksFilter(BaseModel):
     done: bool | None = None

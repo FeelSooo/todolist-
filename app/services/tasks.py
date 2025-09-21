@@ -80,6 +80,18 @@ class TasksService:
         return TaskResponse.model_validate(task)
     
 
+    async def delete_task(self, task_id: int) -> None:
+        async with self.session.begin():
+            task = await self.tasks_repository.get_task_by_id(task_id)
+            if task is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
+            await self.session.delete(task)
+            try:
+                await self.session.flush()
+            except IntegrityError:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="не возможно удалить")
+    
+
     @classmethod
     def provider(cls, session: AsyncSession = Depends(get_session)):
         return cls(session=session)

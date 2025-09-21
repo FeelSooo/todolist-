@@ -35,11 +35,6 @@ async def patch_task(task_id: int, payload:TaskUpdate = ..., service: TasksServi
     return {"result": task}
 
 
-# @router.delete("/{task_id}", status_code=204)
-# def delete_task(task_id: int, db: Session = Depends(get_session)):
-#     task = db.get(Task, task_id)
-#     if task is None:
-#         raise HTTPException(status_code=404, detail="задачи с таким айди нет")
-#     db.delete(task)
-#     db.commit()
-#     return Response(status_code=204)
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_task(task_id: int, service: TasksService = Depends(TasksService.provider)):
+    await service.delete_task(task_id)
