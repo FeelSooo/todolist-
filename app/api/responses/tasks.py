@@ -11,5 +11,9 @@ class TaskResponse(BaseModel):
     updated_at: datetime
 
 
-class TasksRequest(BaseModel):
+class TaskEnvelope(BaseModel):
+    result: TaskResponse
+
+
+class TasksEnvelope(BaseModel):
     result: list[TaskResponse]

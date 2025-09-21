@@ -10,7 +10,7 @@ from app.models.task import Task
 from app.utils import get_repository
 from app.repositories.tasks import TasksRepository
 from app.api.filters.tasks import GetTasksFilter
-from app.api.requests.tasks import CreateTaskRequest
+from app.api.requests.tasks import TaskCreate
 from app.api.responses.tasks import TaskResponse
 from app.models.task import Task 
 
@@ -28,17 +28,30 @@ class TasksService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail={"error": ["Tasks not found"]},
             )
-        return {"result": tasks}
+        return [TaskResponse.model_validate(t) for t in tasks]
     
 
-    # async def create_tasks(self, req: CreateTaskRequest) -> TaskResponse:
-    #     task = Task(
-    #         title = req.title,            
-    #     )
-        
-    #     async with self.session.begin:
-    #         self.session.add(task)
-    #         await self.session.flush()
-    #         await self.session.refresh(task)
+    async def get_task(self, task_id:int):
+        task = await self.tasks_repository.get_task_by_id(task_id)
+        if task is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
+        return TaskResponse.model_validate(task)
 
-    #     return TaskResponse.model_validate(task)
+
+    async def create_tasks(self, req: TaskCreate) -> TaskResponse:
+        task = Task(
+            title = req.title, 
+            title_ci = req.title.lower()           
+        )
+        
+        async with self.session.begin():
+            self.session.add(task)
+            await self.session.flush()
+            await self.session.refresh(task)
+
+        return TaskResponse.model_validate(task)
+    
+
+    @classmethod
+    def provider(cls, session: AsyncSession = Depends(get_session)):
+        return cls(session=session)

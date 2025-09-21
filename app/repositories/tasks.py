@@ -23,3 +23,15 @@ class TasksRepository:
 
         rows = await self.session.execute(query.order_by(Task.id.asc()))
         return rows.scalars().all()
+
+
+    async def get_task_by_id(self, task_id: int) -> Task|None:
+        res = await self.session.execute(select(Task).where(Task.id == task_id))
+        return res.scalar_one_or_none()
+
+
+    async def add(self, task:Task) -> None:
+        self.session.add(task)
+
+    
+    

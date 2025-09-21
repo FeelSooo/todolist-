@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field
 
 
-class CreateTaskRequest(BaseModel):
+class TaskCreate(BaseModel):
     title: str = Field(..., min_length=1)
 
 
-class UpdateTaskRequest(BaseModel):
+class TaskUpdate(BaseModel):
     done: bool | None = None
     title: str | None = Field(default=None, min_length=1)
 
