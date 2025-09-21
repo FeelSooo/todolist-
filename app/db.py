@@ -18,8 +18,8 @@ async_session = async_sessionmaker(async_engine, expire_on_commit=False)
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """get session"""
-    async with (
-        async_engine.begin() as connection,
-        async_session(bind=connection) as session
-    ):
-        yield session
+    async with async_sessionmaker() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
